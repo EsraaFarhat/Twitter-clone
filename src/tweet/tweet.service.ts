@@ -29,4 +29,14 @@ export class TweetService {
     }
     return this.tweetsRepository.createTweet(createTweetCredentialsDto, user);
   }
+
+  async getUserTweets(payload): Promise<Tweet[]> {
+    const { username } = payload;
+    const user: User = await this.usersRepository.findOne({ username });
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return await this.tweetsRepository.find({ user });
+  }
 }
