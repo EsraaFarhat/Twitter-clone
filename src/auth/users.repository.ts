@@ -19,6 +19,7 @@ export class UsersRepository extends Repository<User> {
     const user = this.create({
       username,
       password: hashedPassword,
+      tweets: [],
     });
     try {
       return await this.save(user);
@@ -31,4 +32,23 @@ export class UsersRepository extends Repository<User> {
       }
     }
   }
+
+  //   async followUser(loggedInUser: User, userToFollow: User): Promise<User> {
+  // const user: User = await this.findOne({
+  //   id: userToFollowId,
+  // });
+  // if (!loggedInUser.following) {
+  //   loggedInUser.following = [];
+  // }
+  // if (!user.followers == undefined) {
+  //   user.followers = [];
+  // }
+  // console.log(user);
+  // loggedInUser.following.push(userToFollow);
+  // user.followers.push(loggedInUser);
+  // console.log(user.followers);
+  // await this.save(loggedInUser);
+  // await this.save(user);
+  // return loggedInUser;
+  //   }
 }

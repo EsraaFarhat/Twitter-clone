@@ -6,12 +6,16 @@ import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { jwtPayload } from './jwt-payload.interfece';
+import { FollowRepository } from './follow.repository';
+import { Follow } from './follow.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(UsersRepository)
     private usersRepository: UsersRepository,
+    @InjectRepository(FollowRepository)
+    private followRepository: FollowRepository,
     private jwtService: JwtService,
   ) {}
 
@@ -32,5 +36,39 @@ export class AuthService {
     } else {
       throw new UnauthorizedException('Please check your login credentials');
     }
+  }
+
+  async followUser(payload, userToFollowId: string): Promise<User> {
+    const { username } = payload;
+    const user: User = await this.usersRepository.findOne({ username });
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    const userToFollow: User = await this.usersRepository.findOne({
+      id: userToFollowId,
+    });
+    await this.followRepository.followUser(user, userToFollow);
+    return user;
+  }
+
+  async getMyFollowing(payload): Promise<Follow[]> {
+    const { username } = payload;
+    const loggedInUser: User = await this.usersRepository.findOne({ username });
+
+    if (!loggedInUser) {
+      throw new UnauthorizedException();
+    }
+    return await this.followRepository.find({ user: loggedInUser });
+  }
+
+  async getMyFollowers(payload): Promise<Follow[]> {
+    const { username } = payload;
+    const loggedInUser: User = await this.usersRepository.findOne({ username });
+
+    if (!loggedInUser) {
+      throw new UnauthorizedException();
+    }
+    return await this.followRepository.find({ following: loggedInUser });
   }
 }
